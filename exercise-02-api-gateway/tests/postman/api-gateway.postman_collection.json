@@ -1,0 +1,86 @@
+{
+  "info": {
+    "name": "Security Patterns API Gateway",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8081" },
+    { "key": "email", "value": "student@example.test" },
+    { "key": "password", "value": "" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"email\":\"{{email}}\",\"password\":\"{{password}}\"}" },
+        "url": "{{baseUrl}}/auth/login"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('Login returns 200', () => pm.response.to.have.status(200));",
+          "const body = pm.response.json();",
+          "pm.expect(body.accessToken).to.be.a('string');",
+          "pm.collectionVariables.set('accessToken', body.accessToken);"
+        ] }
+      }]
+    },
+    {
+      "name": "Current user",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+          { "key": "X-User-Id", "value": "attacker" }
+        ],
+        "url": "{{baseUrl}}/users/me"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('JWT accepted', () => pm.response.to.have.status(200));",
+        "pm.test('Spoofed identity overwritten', () => pm.expect(pm.response.json().user.id).to.eql('usr-001'));"
+      ] } }]
+    },
+    {
+      "name": "Orders",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": "{{baseUrl}}/orders"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Orders routed', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().orders).to.be.an('array');"
+      ] } }]
+    },
+    {
+      "name": "Dashboard",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": "{{baseUrl}}/dashboard"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Dashboard aggregated', () => pm.response.to.have.status(200));",
+        "const body = pm.response.json();",
+        "pm.expect(body.user).to.be.an('object');",
+        "pm.expect(body.orders).to.be.an('array');",
+        "pm.expect(body.partial).to.eql(false);"
+      ] } }]
+    },
+    {
+      "name": "Invalid token",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer invalid" }],
+        "url": "{{baseUrl}}/users/me"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Invalid JWT rejected', () => pm.response.to.have.status(401));"
+      ] } }]
+    }
+  ]
+}
+

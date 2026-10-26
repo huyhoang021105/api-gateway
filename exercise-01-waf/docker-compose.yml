@@ -1,0 +1,43 @@
+name: security-patterns-waf
+
+services:
+  web:
+    image: ${JUICE_SHOP_IMAGE:-bkimminich/juice-shop:v17.1.1}
+    ports:
+      - "${JUICE_SHOP_PORT:-3000}:3000"
+    networks:
+      - waf-lab
+    healthcheck:
+      test: ["CMD", "/nodejs/bin/node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  waf:
+    image: ${WAF_IMAGE:-owasp/modsecurity-crs:4.25.1-nginx-202609180209}
+    ports:
+      - "${WAF_PORT:-8080}:8080"
+    environment:
+      BACKEND: http://web:3000
+      PORT: "8080"
+      MODSEC_RULE_ENGINE: "On"
+      BLOCKING_PARANOIA: "1"
+      DETECTION_PARANOIA: "1"
+      ANOMALY_INBOUND: "5"
+      ANOMALY_OUTBOUND: "4"
+      MODSEC_AUDIT_ENGINE: RelevantOnly
+      MODSEC_AUDIT_LOG: /dev/stdout
+      MODSEC_AUDIT_LOG_FORMAT: JSON
+    depends_on:
+      web:
+        condition: service_healthy
+    networks:
+      - waf-lab
+    restart: unless-stopped
+
+networks:
+  waf-lab:
+    driver: bridge
+

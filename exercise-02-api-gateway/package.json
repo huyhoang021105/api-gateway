@@ -1,0 +1,34 @@
+{
+  "name": "security-patterns-api-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start:user": "node dist/services/user-service/index.js",
+    "start:order": "node dist/services/order-service/index.js",
+    "start:dashboard": "node dist/services/dashboard-bff/index.js",
+    "test": "vitest run tests/unit",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1156.0",
+    "@aws-sdk/s3-presigned-post": "3.1156.0",
+    "express": "5.1.0",
+    "jose": "6.1.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.3",
+    "@types/node": "24.8.1",
+    "@types/supertest": "6.0.3",
+    "supertest": "7.1.4",
+    "typescript": "5.9.3",
+    "vitest": "4.1.12"
+  }
+}
+

@@ -1,0 +1,46 @@
+.idea/
+
+# Runtime environment and local overrides (may contain passwords/secrets)
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# Private keys, signing material, local credentials and auth tokens
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_ed25519
+**/secrets/
+**/.secrets/
+**/credentials.json
+**/service-account*.json
+**/*-credentials.json
+**/*token*.txt
+**/*token*.json
+.npmrc
+**/.npmrc
+.aws/
+**/.aws/
+.docker/config.json
+**/.docker/config.json
+
+# Dependencies and generated build/test output
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+coverage/
+**/coverage/
+*.log
+*.log.*
+exercise-01-waf/evidence/generated/
+exercise-02-api-gateway/evidence/generated/
+exercise-02-api-gateway/.k6/
+
